@@ -1,0 +1,3 @@
+service : {
+  balanceOf: (who: principal) -> (nat) query;
+}
