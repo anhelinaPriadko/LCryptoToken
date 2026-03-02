@@ -8,16 +8,31 @@ function Balance() {
   const [tokenCurrency, setTokenCurrency] = useState("");
   const [isHidden, setIsHidden] = useState(true);
 
-  // const tokenCurrency = await token.getSymbol;
   
   async function handleClick() {
-    // console.log("Input:", inputPrincipal);
-    // console.log("Token Actor Object:", token);
-    const principal = Principal.fromText(inputPrincipal);
-    const balance = await token.balanceOf(principal);
-    setBalance(balance.toLocaleString());
-    setTokenCurrency(await token.getSymbol());
-    setIsHidden(false);
+    if (!inputPrincipal || inputPrincipal.trim() === "") {
+        setBalance("0");
+        setTokenCurrency("");
+        setIsHidden(true);
+        return;
+    }
+
+    try {
+        const principal = Principal.fromText(inputPrincipal);
+        
+        const balance = await token.balanceOf(principal);
+        const symbol = await token.getSymbol();
+        
+        setBalance(balance.toLocaleString());
+        setTokenCurrency(symbol);
+        setIsHidden(false); 
+        
+    } catch (error) {
+        console.error("Помилка ідентифікатора:", error);
+        setBalance("Invalid ID");
+        setTokenCurrency("");
+        setIsHidden(false);
+    }
 }
 
 

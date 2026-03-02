@@ -28,11 +28,22 @@ persistent actor Token {
         Debug.print(debug_show(Principal.toText(msg.caller)));
         if(balances.get(msg.caller) == null) {
             let amount = 1000;
-            balances.put(msg.caller, amount);
-            return "Success!";
+            let result = await transfer(msg.caller, amount);
+            return result;
         };
         return "You have already received your payout.";
     };
 
+    public shared (msg) func transfer(to: Principal, amount: Nat): async Text {
+        let fromBalance = await balanceOf(msg.caller);
+        if(fromBalance >= amount) {
+            let newFromBalance:Nat = fromBalance - amount;
+            balances.put(msg.caller, newFromBalance);
+            let toBalance = await balanceOf(to);
+            balances.put(to, toBalance + amount);
+            return "Transfer successful!";
+        };
+        return "Insufficient balance.";
+    };
 
 }
