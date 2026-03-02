@@ -1,16 +1,16 @@
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import Debug "mo:base/Debug";
+import Iter "mo:base/Iter";
 
 persistent actor Token {
-    // Додаємо transient до кожної змінної, на яку скаржиться moc
     transient let owner : Principal = Principal.fromText("oyjdb-nvyry-3ogif-jkwrs-due4f-eulp6-7zgjg-fmzcn-wferi-oapfu-fae");
     transient let totalSupply : Nat = 1000000000;
     transient let symbol : Text = "LToken";
 
-    transient let balances = HashMap.HashMap<Principal, Nat>(1, Principal.equal, Principal.hash);
+    var balanceEntries : [(Principal, Nat)] = [];
 
-    // Прибираємо ignore, бо термінал каже, що воно зайве (warning M0089)
+    private transient var balances = HashMap.HashMap<Principal, Nat>(1, Principal.equal, Principal.hash);
     balances.put(owner, totalSupply);
 
     public query func balanceOf(who: Principal): async Nat {
@@ -46,4 +46,16 @@ persistent actor Token {
         return "Insufficient balance.";
     };
 
-}
+    system func preupgrade() {
+        balanceEntries := Iter.toArray(balances.entries());
+    };
+
+    system func postupgrade() {
+        balances := HashMap.fromIter<Principal, Nat>(balanceEntries.vals(), 1, Principal.equal, Principal.hash);
+        if(balances.size() < 1) {
+            balances.put(owner, totalSupply);
+        };
+        balanceEntries := [];
+    };
+
+};
