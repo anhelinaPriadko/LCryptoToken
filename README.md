@@ -1,85 +1,52 @@
-# Check your Balance
+LToken (LNT) 🪙
+A decentralized token and management platform built on the Internet Computer Protocol (ICP). This project demonstrates a full-stack Web3 application, including custom token logic, secure authentication, and data persistence.
 
-1. Find out your principal id:
+🛠 Tech Stack
+Backend: Motoko (Actor Model & Stable Memory)
 
-```
-dfx identity get-principal
-```
+Frontend: React.js
 
-2. Save it somewhere.
+Authentication: Internet Identity (II)
 
-e.g. My principal id is: gbdev-tyqsv-hnvqv-7mgz4-4kcfl-wbv6x-6khez-y56gq-uohqs-quomc-uqe
+Environment: WSL (Ubuntu) + DFX SDK
 
+✨ Key Features
+Token Operations: Check the balance of any Principal ID and perform secure transfers of LToken.
 
-3. Format and store it in a command line variable:
-```
-OWNER_PUBLIC_KEY="principal \"$( \dfx identity get-principal )\""
-```
+Authenticated Faucet: Users can claim 10,000 LTokens once. The identity is verified via Internet Identity to prevent double-claiming.
 
-4. Check that step 3 worked by printing it out:
-```
-echo $OWNER_PUBLIC_KEY
-```
+Data Persistence: Your balances are safe! I've implemented system hooks to ensure data survives canister upgrades.
 
-5. Check the owner's balance:
-```
-dfx canister call token balanceOf "( $OWNER_PUBLIC_KEY )"
-```
+💾 How Data Persistence Works
+Unlike standard variables that clear during an update, LToken uses specialized hooks to migrate data:
 
-# Charge the Canister
+preupgrade(): Just before an update, the HashMap containing all balances is converted into a stable array.
 
+postupgrade(): Immediately after the new code is deployed, the system restores the HashMap from that stable array.
+This ensures that your users don't lose their tokens when you fix a bug or add a new feature.
 
-1. Check canister ID:
-```
-dfx canister id token
-```
+🚀 Getting Started
+If you want to run this project or continue development, follow these steps in your WSL terminal:
 
-2. Save canister ID into a command line variable:
-```
-CANISTER_PUBLIC_KEY="principal \"$( \dfx canister id token )\""
-```
+1. Start the Local Network
+This boots up the local Internet Computer environment.
 
-3. Check canister ID has been successfully saved:
-```
-echo $CANISTER_PUBLIC_KEY
-```
+Bash
+dfx start --background --clean
+Note: Use --clean if you want a fresh start, or omit it to keep existing data.
 
-4. Transfer half a billion tokens to the canister Principal ID:
-```
-dfx canister call token transfer "($CANISTER_PUBLIC_KEY, 500_000_000)"
-```
+2. Install Dependencies
+Bash
+npm install
+3. Deploy Canisters
+This compiles the Motoko code and deploys the token, token_assets, and internet_identity canisters.
 
-# Deploy the Project to the Live IC Network
+Bash
+dfx deploy
+4. Run the Frontend
+Bash
+npm start
+The app will typically be available at http://localhost:8080 (or the port specified in your terminal).
 
-1. Create and deploy canisters:
-
-```
-dfx deploy --network ic
-```
-
-2. Check the live canister ID:
-```
-dfx canister --network ic id token
-```
-
-3. Save the live canister ID to a command line variable:
-```
-LIVE_CANISTER_KEY="principal \"$( \dfx canister --network ic id token )\""
-```
-
-4. Check that it worked:
-```
-echo $LIVE_CANISTER_KEY
-```
-
-5. Transfer some tokens to the live canister:
-```
-dfx canister --network ic call token transfer "($LIVE_CANISTER_KEY, 50_000_000)"
-```
-
-6. Get live canister front-end id:
-```
-dfx canister --network ic id token_assets
-```
-7. Copy the id from step 6 and add .raw.ic0.app to the end to form a URL.
-e.g. zdv65-7qaaa-aaaai-qibdq-cai.raw.ic0.app
+🔑 Local Development Note
+When testing the Internet Identity login locally, ensure the identityProvider URL in index.jsx matches the ID of your locally deployed internet_identity canister (e.g., http://<canister_id>.localhost:8000/#authorize).

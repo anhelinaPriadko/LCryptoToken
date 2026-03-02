@@ -1,5 +1,6 @@
 import React, {useState} from "react";
-import { token } from "../../../declarations/token";
+import { token, canisterId, createActor } from "../../../declarations/token";
+import { AuthClient } from "@dfinity/auth-client";
 
 function Faucet() {
   const [isDisabled, setIsDisabled] = useState(false);
@@ -7,7 +8,10 @@ function Faucet() {
 
   async function handleClick(event) {
     setIsDisabled(true);
-    const payoutResult = await token.payOut();
+    const authClient = await AuthClient.create();
+    const identity = await authClient.getIdentity();
+    const authenticatedActor = createActor(canisterId, { agentOptions: { identity } });
+    const payoutResult = await authenticatedActor.payOut();
     setButtonText(payoutResult);
   }
 
