@@ -1,6 +1,6 @@
 import React, {useState} from "react";
-import { token, canisterId, createActor } from "../../../declarations/token";
-import { AuthClient } from "@dfinity/auth-client";
+// 1. Імпортуємо просто token
+import { token } from "../../../declarations/token"; 
 
 function Faucet() {
   const [isDisabled, setIsDisabled] = useState(false);
@@ -8,19 +8,23 @@ function Faucet() {
 
   async function handleClick(event) {
     setIsDisabled(true);
-    const authClient = await AuthClient.create();
-    const identity = await authClient.getIdentity();
-    const authenticatedActor = createActor(canisterId, { agentOptions: { identity } });
-    const payoutResult = await authenticatedActor.payOut();
-    setButtonText(payoutResult);
+
+    // 2. Видаляємо AuthClient та створення identity
+    // Замість створення нового актора використовуємо глобальний token
+    try {
+        const payoutResult = await token.payOut(); 
+        setButtonText(payoutResult);
+    } catch (error) {
+        console.error("Faucet error:", error);
+        setButtonText("Error");
+        setIsDisabled(false);
+    }
   }
 
   return (
     <div className="blue window">
       <h2>
-        <span role="img" aria-label="tap emoji">
-          🚰
-        </span>
+        <span role="img" aria-label="tap emoji">🚰</span>
         Faucet
       </h2>
       <label>Get your free DAngela tokens here! Claim 10,000 DANG coins to your account.</label>
